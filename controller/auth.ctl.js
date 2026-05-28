@@ -1,4 +1,4 @@
-const Auth = require('../models/auth.Schema');
+const User = require('../models/user.Schema');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -10,12 +10,13 @@ const {
 const { asyncHandler } = require('../utils/asyncHandler');
 const { ApiResponse } = require('../utils/APIResponse');
 const { ApiError } = require('../utils/APIError');
+const { USER_ROLES } = require('../constant/auth.constant');
 const JWT_SECRET = process.env.JWT_SECRET_KEY;
 const JWT_EXPIRY = process.env.JWT_EXPIRES_IN || '7d';
 
 function sanitizeUser(user) {
   return {
-    _id: user?._id,
+    id: user?._id,
     email: user?.email,
     name: user?.name
   };
@@ -42,22 +43,34 @@ if (password.length < 6) {
     );
   }
 
+  if(!role) {
+    throw ApiError.badRequest('Role is required')
+  }
+
+  if(!USER_ROLES.includes(role)){
+    throw ApiError.badRequest(`User role is invalid. Allow values are ${USER_ROLES.join(',')}`)
+  }
+   const existUser = await User.findOne({email: email.toLowerCase()})
+   if(existUser) {
+     throw ApiError.badRequest('User is already existed')
+   }
+
   const hashedPassword = await bcrypt.hash(password, 10);
-  const auth = new Auth({
-    name,
-    email,
+  const user = new User({
+    name: name.trim(),
+    email: email.trim().toLowerCase(),
     password: hashedPassword,
     role
   });
-  const newAuth = await auth.save();
-const token = jwt.sign({ userId: newAuth._id , name:newAuth.name, email: newAuth.email, role: newAuth.role }, JWT_SECRET, { expiresIn: '7d' });
+  const newUser = await user.save();
+const token = jwt.sign({ userId: newUser._id , email: newUser.email, role: newUser.role }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
 
   
   return res
     .status(201)
     .json(
       ApiResponse.created(
-        {...sanitizeUser(newAuth), token },
+        {...sanitizeUser(newUser), token },
         'User created successfully!'
       )
     );
@@ -73,17 +86,17 @@ module.exports.login = asyncHandler(async (req, res) => {
     });
   }
 
-  const auth = await Auth.findOne({ email });
-  if (!auth) {
+  const user = await User.findOne({ email: email.trim().toLowerCase() });
+  if (!user) {
     throw ApiError.notFound('User not found');
   }
 
-  const isPasswordValid = await bcrypt.compare(password, auth.password);
+  const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
     throw ApiError.unauthorized('Invalid password');
   }
 
-  const token = jwt.sign({ userId: auth._id , name:auth.name, email: auth.email, role: auth.role }, JWT_SECRET, {
+  const token = jwt.sign({ userId: user._id , email: user.email, role: user.role }, JWT_SECRET, {
     expiresIn: JWT_EXPIRY,
   });
 
@@ -91,7 +104,7 @@ module.exports.login = asyncHandler(async (req, res) => {
     .status(200)
     .json(
       ApiResponse.success(
-        { ...sanitizeUser(auth), token },
+        { ...sanitizeUser(user), token },
         'Login successfully!'
       )
     );
@@ -100,12 +113,13 @@ module.exports.login = asyncHandler(async (req, res) => {
 
 module.exports.getProfile = asyncHandler(async (req, res) => {
   
+  const user = await User.findById(req.user.userId)
 
   return res
     .status(200)
     .json(
       ApiResponse.success(
-        req.user,
+        { ...sanitizeUser(user) },
         'User got successfully!'
       )
     );
@@ -121,26 +135,26 @@ module.exports.changePassword = asyncHandler(async (req, res) => {
     });
   }
   
-  const auth = await Auth.findOne({ email: req.user.email });
-  if (!auth) {
+  const user = await User.findOne({ email: req.user.email });
+  if (!user) {
     throw ApiError.notFound('User not found');
   }
 
-  const isPasswordValid = await bcrypt.compare(oldPassword, auth.password);
+  const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
   if (!isPasswordValid) {
     throw ApiError.unauthorized('Invalid password');
   }
 
  const hashedPassword = await bcrypt.hash(newPassword, 10);
   
-  auth.password =  hashedPassword;
-  const newAuth = await auth.save();
+  user.password =  hashedPassword;
+  const newUser = await user.save();
 
   return res
     .status(200)
     .json(
       ApiResponse.success(
-        { ...sanitizeUser(newAuth) },
+        { ...sanitizeUser(newUser) },
         'Password changed successfully'
       )
     );

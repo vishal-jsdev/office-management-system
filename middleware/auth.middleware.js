@@ -1,4 +1,4 @@
-const userSchema = require('../models/auth.Schema');
+const userSchema = require('../models/user.Schema');
 const jwt = require('jsonwebtoken');
 const { ApiError } = require('../utils/APIError');
 
@@ -38,4 +38,25 @@ const authMiddleware = async (req, _, next) => {
   }
 };
 
+const roleMap = {"admin": 3, "manager": 2, "employee": 1}
+ const isAdmin = (req, res, next) => {
+  if (roleMap[req.user.role] < 3) {
+    return res.status(403).json({ message: "Unauthorized : Not a Admin" });
+  }
+  next();
+};
+
+ const isManager = (req, res, next) => {
+  if (roleMap[req.userData.role] < 2) {
+    return res.status(403).json({ message: "Unauthorized : Not a Manager" });
+  }
+  next();
+};
+
+ const isEmployee = (req, res, next) => {
+  if (roleMap[req.userData.role] < 1) {
+    return res.status(403).json({ message: "Unauthorized : Not a Employee" });
+  }
+  next();
+};
 module.exports = { authMiddleware };

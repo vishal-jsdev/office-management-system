@@ -66,7 +66,7 @@ route.post('/register', ctl.register);
  *       401:
  *         description: Invalid credentials
  */
-route.post('/login', ctl.login);-
+route.post('/login', ctl.login);
 
 /**
  * @swagger
@@ -76,7 +76,6 @@ route.post('/login', ctl.login);-
  *     tags: [User Login/Register]
  *     security:
  *       - bearerAuth: []   # JWT token required
- *     parameters:
  *     responses:
  *       200:
  *         description: Returns user data

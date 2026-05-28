@@ -1,17 +1,21 @@
 const mongoose = require('mongoose');
-const authSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
+      required: true
     },
     email: {
       type: String,
+      required: true
     },
     password: {
       type: String,
+      required: true
     },
     role: {
         type: String,
+        required: true,
         enum: ["admin", "manager", "employee"],
         default: "employee",
     }
@@ -21,5 +25,5 @@ const authSchema = new mongoose.Schema(
   }
 );
 
-const Auth = mongoose.model('Auth', authSchema);
-module.exports = Auth;
+const User = mongoose.model('User', userSchema);
+module.exports = User;
