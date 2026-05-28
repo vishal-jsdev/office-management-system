@@ -6,7 +6,9 @@ const dotenv = require('dotenv');
 dotenv.config();
 const app = express();
 const { ApiError, errorHandler } = require('./utils/APIError');
-
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger/swagger'); // path to your swagger-jsdoc file
+const basicAuth = require('express-basic-auth');
 const User = require('./routes/user.route');
 connectDB();
 app.use(
@@ -19,9 +21,33 @@ app.use(
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+const swaggerAuth =
+  process.env.NODE_ENV === 'production'
+    ? basicAuth({
+        authorizer: (username, password) => {
+          return (
+            basicAuth.safeCompare(username, process.env.SWAGGER_USERNAME) &&
+            basicAuth.safeCompare(password, process.env.SWAGGER_PASSWORD)
+          );
+        },
+        challenge: true,
+      })
+    : (req, res, next) => next();
 
 // Define routes
 app.use('/user', User);
+
+// swagger route
+app.use(
+  '/api-docs',
+  swaggerAuth,
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    swaggerOptions: {
+      persistAuthorization: true, // this caches the token
+    },
+  })
+);
 // Global error handler middleware
 app.use(errorHandler);
 app.listen(port, (error) => {
