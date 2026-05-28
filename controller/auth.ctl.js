@@ -23,13 +23,14 @@ function sanitizeUser(user) {
 }
 module.exports.register = asyncHandler(async (req, res) => {
   const { name, email , password, role } = req.body;
-  if (!name || !email || !password ) {
+  if (!name || !email || !password || !role) {
     throw ApiError.badRequest(
       'Name, Email and Password are required',
       {
         name: !name ? 'Name is required' : undefined,
         email: !email ? 'Email is required' : undefined,
-        password: !password ? 'Password is required' : undefined
+        password: !password ? 'Password is required' : undefined,
+        role: !role? 'Role is required': undefined
       }
     );
   }
@@ -43,16 +44,13 @@ if (password.length < 6) {
     );
   }
 
-  if(!role) {
-    throw ApiError.badRequest('Role is required')
-  }
 
   if(!USER_ROLES.includes(role)){
     throw ApiError.badRequest(`User role is invalid. Allow values are ${USER_ROLES.join(',')}`)
   }
    const existUser = await User.findOne({email: email.toLowerCase()})
    if(existUser) {
-     throw ApiError.badRequest('User is already existed')
+     throw ApiError.badRequest('User already exists')
    }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -114,12 +112,14 @@ module.exports.login = asyncHandler(async (req, res) => {
 module.exports.getProfile = asyncHandler(async (req, res) => {
   
   const user = await User.findById(req.user.userId)
-
+  if(!user) {
+     throw ApiError.badRequest('User is not found')
+   }
   return res
     .status(200)
     .json(
       ApiResponse.success(
-        { ...sanitizeUser(user) },
+        sanitizeUser(user),
         'User got successfully!'
       )
     );

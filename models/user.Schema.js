@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { USER_ROLES } = require('../constant/auth.constant');
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -7,7 +8,8 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: true
+      required: true,
+      unique: true
     },
     password: {
       type: String,
@@ -16,7 +18,7 @@ const userSchema = new mongoose.Schema(
     role: {
         type: String,
         required: true,
-        enum: ["admin", "manager", "employee"],
+        enum: USER_ROLES,
         default: "employee",
     }
   },
@@ -24,6 +26,6 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
+userSchema.index({email:1})
 const User = mongoose.model('User', userSchema);
 module.exports = User;
