@@ -78,7 +78,7 @@ module.exports.login = asyncHandler(async (req, res) => {
     throw ApiError.notFound('User not found');
   }
 
-  const isPasswordValid = await bcrypt.compare(password, user.password);
+  const isPasswordValid = await bcrypt.compare(password, auth.password);
   if (!isPasswordValid) {
     throw ApiError.unauthorized('Invalid password');
   }
@@ -126,7 +126,7 @@ module.exports.changePassword = asyncHandler(async (req, res) => {
     throw ApiError.notFound('User not found');
   }
 
-  const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+  const isPasswordValid = await bcrypt.compare(oldPassword, auth.password);
   if (!isPasswordValid) {
     throw ApiError.unauthorized('Invalid password');
   }

@@ -12,6 +12,8 @@ const authSchema = new mongoose.Schema(
     },
     role: {
         type: String,
+        enum: ["admin", "manager", "employee"],
+        default: "employee",
     }
   },
   {
