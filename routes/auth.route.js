@@ -1,11 +1,11 @@
 const express = require('express');
 const route = express.Router();
-const ctl = require('../controller/user.ctl');
+const ctl = require('../controller/auth.ctl');
 const { authMiddleware } = require('../middleware/auth.middleware');
 
 /**
  * @swagger
- * /user/register:
+ * /auth/register:
  *   post:
  *     summary: Register a new user
  *     tags: [User Login/Register]
@@ -40,7 +40,7 @@ route.post('/register', ctl.register);
 
 /**
  * @swagger
- * /user/login:
+ * /auth/login:
  *   post:
  *     summary: Login a user
  *     tags: [User Login/Register]
@@ -70,7 +70,7 @@ route.post('/login', ctl.login);-
 
 /**
  * @swagger
- * /user/profile:
+ * /auth/profile:
  *   get:
  *     summary: Get user data from token
  *     tags: [User Login/Register]
@@ -101,7 +101,7 @@ route.get('/profile',authMiddleware , ctl.getProfile);
 
 /**
  * @swagger
- * /user/change-password:
+ * /auth/change-password:
  *   post:
  *     summary: Change user password
  *     tags: [User Login/Register]

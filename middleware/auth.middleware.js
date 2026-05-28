@@ -1,4 +1,4 @@
-const userSchema = require('../models/user.Schema');
+const userSchema = require('../models/auth.Schema');
 const jwt = require('jsonwebtoken');
 const { ApiError } = require('../utils/APIError');
 

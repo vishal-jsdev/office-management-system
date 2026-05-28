@@ -1,4 +1,4 @@
-const User = require('../models/user.Schema');
+const Auth = require('../models/auth.Schema');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -43,21 +43,21 @@ if (password.length < 6) {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = new User({
+  const auth = new Auth({
     name,
     email,
     password: hashedPassword,
     role
   });
-  const newUser = await user.save();
-const token = jwt.sign({ userId: newUser._id , name:newUser.name, email: newUser.email, role: newUser.role }, JWT_SECRET, { expiresIn: '7d' });
+  const newAuth = await auth.save();
+const token = jwt.sign({ userId: newAuth._id , name:newAuth.name, email: newAuth.email, role: newAuth.role }, JWT_SECRET, { expiresIn: '7d' });
 
   
   return res
     .status(201)
     .json(
       ApiResponse.created(
-        {...sanitizeUser(newUser), token },
+        {...sanitizeUser(newAuth), token },
         'User created successfully!'
       )
     );
@@ -73,8 +73,8 @@ module.exports.login = asyncHandler(async (req, res) => {
     });
   }
 
-  const user = await User.findOne({ email });
-  if (!user) {
+  const auth = await Auth.findOne({ email });
+  if (!auth) {
     throw ApiError.notFound('User not found');
   }
 
@@ -83,7 +83,7 @@ module.exports.login = asyncHandler(async (req, res) => {
     throw ApiError.unauthorized('Invalid password');
   }
 
-  const token = jwt.sign({ userId: user._id , name:user.name, email: user.email, role: user.role }, JWT_SECRET, {
+  const token = jwt.sign({ userId: auth._id , name:auth.name, email: auth.email, role: auth.role }, JWT_SECRET, {
     expiresIn: JWT_EXPIRY,
   });
 
@@ -91,7 +91,7 @@ module.exports.login = asyncHandler(async (req, res) => {
     .status(200)
     .json(
       ApiResponse.success(
-        { ...sanitizeUser(user), token },
+        { ...sanitizeUser(auth), token },
         'Login successfully!'
       )
     );
@@ -121,8 +121,8 @@ module.exports.changePassword = asyncHandler(async (req, res) => {
     });
   }
   
-  const user = await User.findOne({ email: req.user.email });
-  if (!user) {
+  const auth = await Auth.findOne({ email: req.user.email });
+  if (!auth) {
     throw ApiError.notFound('User not found');
   }
 
@@ -133,14 +133,14 @@ module.exports.changePassword = asyncHandler(async (req, res) => {
 
  const hashedPassword = await bcrypt.hash(newPassword, 10);
   
-  user.password =  hashedPassword;
-  const newUser = await user.save();
+  auth.password =  hashedPassword;
+  const newAuth = await auth.save();
 
   return res
     .status(200)
     .json(
       ApiResponse.success(
-        { ...sanitizeUser(newUser) },
+        { ...sanitizeUser(newAuth) },
         'Password changed successfully'
       )
     );
