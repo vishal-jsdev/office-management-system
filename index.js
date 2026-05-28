@@ -9,7 +9,7 @@ const { ApiError, errorHandler } = require('./utils/APIError');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger/swagger'); // path to your swagger-jsdoc file
 const basicAuth = require('express-basic-auth');
-const User = require('./routes/user.route');
+const Auth = require('./routes/auth.route');
 connectDB();
 app.use(
   cors({
@@ -35,7 +35,7 @@ const swaggerAuth =
     : (req, res, next) => next();
 
 // Define routes
-app.use('/user', User);
+app.use('/auth', Auth);
 
 // swagger route
 app.use(
