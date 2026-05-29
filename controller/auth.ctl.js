@@ -60,15 +60,15 @@ if (password.length < 6) {
     password: hashedPassword,
     role
   });
-  const newUser = await user.save();
-const token = jwt.sign({ userId: newUser._id , email: newUser.email, role: newUser.role }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
+  await user.save();
+const token = jwt.sign({ userId: user._id , email: user.email, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
 
   
   return res
     .status(201)
     .json(
       ApiResponse.created(
-        {...sanitizeUser(newUser), token },
+        {...sanitizeUser(user), token },
         'User created successfully!'
       )
     );
@@ -159,8 +159,3 @@ module.exports.changePassword = asyncHandler(async (req, res) => {
       )
     );
 });
-
-
-
-
-
