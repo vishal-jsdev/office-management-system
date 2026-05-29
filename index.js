@@ -10,6 +10,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger/swagger'); // path to your swagger-jsdoc file
 const basicAuth = require('express-basic-auth');
 const Auth = require('./routes/auth.route');
+const Employee = require('./routes/employee.route');
 connectDB();
 app.use(
   cors({
@@ -36,7 +37,7 @@ const swaggerAuth =
 
 // Define routes
 app.use('/auth', Auth);
-
+app.use('/employee', Employee);
 // swagger route
 app.use(
   '/api-docs',

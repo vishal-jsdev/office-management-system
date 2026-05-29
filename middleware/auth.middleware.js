@@ -47,16 +47,16 @@ const roleMap = {"admin": 3, "manager": 2, "employee": 1}
 };
 
  const isManager = (req, res, next) => {
-  if (roleMap[req.userData.role] < 2) {
+  if (roleMap[req.user.role] < 2) {
     return res.status(403).json({ message: "Unauthorized : Not a Manager" });
   }
   next();
 };
 
  const isEmployee = (req, res, next) => {
-  if (roleMap[req.userData.role] < 1) {
+  if (roleMap[req.user.role] < 1) {
     return res.status(403).json({ message: "Unauthorized : Not a Employee" });
   }
   next();
 };
-module.exports = { authMiddleware };
+module.exports = { authMiddleware, isAdmin, isManager, isEmployee };
