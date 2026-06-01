@@ -71,35 +71,26 @@ route.post('/add', authMiddleware, isAdmin, ctl.addEmployee);
  *       - bearerAuth: []   # JWT token required
  *     parameters:
  *       - in: query
- *         name: page
+ *         name: filters
+ *         required: false
  *         schema:
- *           type: number
- *           example: 1
- *         description: page of employee records
- *       - in: query
- *         name: limit
- *         schema:
- *           type: number
- *           example: 1
- *         description: limit of employee records
- *       - in: query
- *         name: departmentId
- *         schema:
- *           type: string
- *           example: 6a1960fea11f709cd1467167
- *         description: department Id of employee records
- *       - in: query
- *         name: role
- *         schema:
- *           type: string
- *           example: employee
- *         description: The role of employee records
- *       - in: query
- *         name: status
- *         schema:
- *           type: string
- *           example: active
- *         description: The status of employee records
+ *           type: object
+ *           properties:
+ *             page:
+ *               type: number
+ *               example: 1
+ *             limit:
+ *               type: number
+ *               example: 10
+ *             departmentId:
+ *               type: string
+ *               example: 6a1960fea11f709cd1467167
+ *             role:
+ *               type: string
+ *               example: employee
+ *             status:
+ *               type: string
+ *               example: active
  *     responses:
  *       200:
  *         description: Returns user data

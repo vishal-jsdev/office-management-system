@@ -41,21 +41,21 @@ const authMiddleware = async (req, _, next) => {
 const roleMap = {"admin": 3, "manager": 2, "employee": 1}
  const isAdmin = (req, res, next) => {
   if (roleMap[req.user.role] < 3) {
-    return ApiError.forbidden('Unauthorized : Not a Admin');
+    throw ApiError.forbidden('Unauthorized : Not a Admin');
   }
   next();
 };
 
  const isManager = (req, res, next) => {
   if (roleMap[req.user.role] < 2) {
-    return ApiError.forbidden('Unauthorized : Not a Manager')
+    throw ApiError.forbidden('Unauthorized : Not a Manager')
   }
   next();
 };
 
  const isEmployee = (req, res, next) => {
   if (roleMap[req.user.role] < 1) {
-    return ApiError.forbidden('Unauthorized : Not a Employee')
+    throw ApiError.forbidden('Unauthorized : Not a Employee')
   }
   next();
 };
