@@ -80,7 +80,12 @@ module.exports.updateDepartment = asyncHandler(async(req,res)=>{
 
 module.exports.removeDepartment = asyncHandler(async(req,res)=>{
     validateId(req.params.id, 'department');
-    
+    const employees = await Employee.find({departmentId: req.params.id}).lean()
+    if(employees.filter(employee => {
+        return employee.status === 'active'
+    })>0){
+       throw ApiError.badRequest('Department has active employee'); 
+    }
     const department = await Department.findByIdAndDelete(req.params.id);
     if(!department) {
         throw ApiError.notFound('Department not found');
