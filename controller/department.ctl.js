@@ -83,7 +83,7 @@ module.exports.removeDepartment = asyncHandler(async(req,res)=>{
     const employees = await Employee.find({departmentId: req.params.id}).lean()
     if(employees.filter(employee => {
         return employee.status === 'active'
-    })>0){
+    }).length>0){
        throw ApiError.badRequest('Department has active employee'); 
     }
     const department = await Department.findByIdAndDelete(req.params.id);
