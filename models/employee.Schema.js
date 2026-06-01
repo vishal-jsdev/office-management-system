@@ -37,7 +37,8 @@ const employeeSchema = new mongoose.Schema(
     status: {
       type: String,
       enum:EMPLOYEE_STATUS,
-      required: true
+      required: true,
+      default: 'active'
     }
   },
   {

@@ -8,7 +8,7 @@ const { authMiddleware, isAdmin, isManager, isEmployee } = require('../middlewar
  * /employee/add:
  *   post:
  *     summary: Create a new employee
- *     tags: [Employee]
+ *     tags: [Employees  Management]
  *     description: name, email, phone, role, department id, salary, joining date and status are required
  *     security:
  *       - bearerAuth: []   # JWT token required
@@ -66,7 +66,7 @@ route.post('/add', authMiddleware, isAdmin, ctl.addEmployee);
  * /employee/:
  *   get:
  *     summary: Get employees 
- *     tags: [Employee]
+ *     tags: [Employees  Management]
  *     security:
  *       - bearerAuth: []   # JWT token required
  *     parameters:
@@ -127,7 +127,7 @@ route.get('/',authMiddleware, isManager , ctl.getAllemployee);
  * /employee/{id}:
  *   get:
  *     summary: Get employees 
- *     tags: [Employee]
+ *     tags: [Employees  Management]
  *     security:
  *       - bearerAuth: []   # JWT token required
  *     parameters:
@@ -161,10 +161,10 @@ route.get('/:id',authMiddleware, isEmployee , ctl.getEmployee);
 /**
  * @swagger
  * /employee/update:
- *   put:
- *     summary: update a employee details
- *     tags: [Employee]
- *     description: name, email, phone, role, department id, salary, joining date and status are required
+ *   patch:
+ *     summary: update an employee details
+ *     tags: [Employees  Management]
+ *     description: id, name, phone, role, department id, salary and status are required
  *     security:
  *       - bearerAuth: []   # JWT token required
  *     requestBody:
@@ -175,12 +175,6 @@ route.get('/:id',authMiddleware, isEmployee , ctl.getEmployee);
  *             type: object
  *             required:
  *               - id
- *               - name
- *               - phone
- *               - role
- *               - departmentId
- *               - salary
- *               - status
  *             properties:
  *               id:
  *                 type: string
@@ -209,15 +203,15 @@ route.get('/:id',authMiddleware, isEmployee , ctl.getEmployee);
  *       400:
  *         description: Invalid input
  */
-route.put('/update',authMiddleware, isAdmin , ctl.updateEmployee);
+route.patch('/update',authMiddleware, isAdmin , ctl.updateEmployee);
 
 
 /**
  * @swagger
  * /employee/{id}:
- *   delete:
- *     summary: remove a employee details 
- *     tags: [Employee]
+ *   patch:
+ *     summary: remove an employee data 
+ *     tags: [Employees  Management]
  *     security:
  *       - bearerAuth: []   # JWT token required
  *     parameters:
@@ -246,6 +240,6 @@ route.put('/update',authMiddleware, isAdmin , ctl.updateEmployee);
  *       404:
  *         description: User not found
  */
-route.delete('/:id',authMiddleware, isAdmin , ctl.removeEmployee);
+route.patch('/:id',authMiddleware, isAdmin , ctl.removeEmployee);
 
 module.exports = route;

@@ -62,11 +62,11 @@ module.exports.addEmployee = asyncHandler(async (req, res) => {
     name: name.trim(),
     email: email.trim().toLowerCase(),
     phone,
-    role,
+    role: role ?? "employee",
     departmentId,
     salary,
     joiningDate: parsedJoiningDate,
-    status
+    status: status ?? "active"
   });
   await employee.save();
 
@@ -82,7 +82,7 @@ module.exports.addEmployee = asyncHandler(async (req, res) => {
 });
 
 module.exports.getAllemployee = asyncHandler(async(req,res)=>{
-  const { page, limit, departmentId, role, status } = req.query;
+  const { page = 1, limit = 10, departmentId, role, status } = req.query;
 
   const filter = {}
     
@@ -104,13 +104,13 @@ module.exports.getAllemployee = asyncHandler(async(req,res)=>{
   const skip = (page -1) * limit
 
   const employees = await Employee.find(filter).skip(skip).limit(limit).lean()
-  return res.status(200).json(ApiResponse.success(employees, "Employees fetched successfully"))
+  return res.status(200).json(ApiResponse.success(employees, "Employees list fetched successfully"))
 
 });
 
 module.exports.getEmployee = asyncHandler(async(req,res)=>{
 
-  validateId(req.params.id)
+  validateId(req.params.id, 'employee')
 
   const employee = await Employee.findById(req.params.id);
   if(!employee){
@@ -152,7 +152,7 @@ module.exports.updateEmployee = asyncHandler(async(req, res)=>{
 
   const employeeData = await Employee.findByIdAndUpdate(id,{$set:saveData},{new:true,runValidators:true})
   if(!employeeData){
-    throw ApiError.notFound('Employee is not found');
+    throw ApiError.notFound('Employee not found');
   }
 
   return res.status(200).json(ApiResponse.success(employeeData,'Employee updated succcessfully'));
@@ -161,7 +161,7 @@ module.exports.updateEmployee = asyncHandler(async(req, res)=>{
 
 
 module.exports.removeEmployee = asyncHandler(async(req,res)=>{
-  validateId(req.params.id);
+  validateId(req.params.id, 'employee');
 
   const employeeData = await Employee.findByIdAndUpdate(req.params.id, {
     $set : {status: 'inactive'}
@@ -169,7 +169,7 @@ module.exports.removeEmployee = asyncHandler(async(req,res)=>{
     new:true,runValidators:true
   })
   if(!employeeData){
-    throw ApiError.notFound('Employee is not found')
+    throw ApiError.notFound('Employee not found')
   }
 
   return res.status(200).json(ApiResponse.success(employeeData, 'Employee deleted successfully'))
