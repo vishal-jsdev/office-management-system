@@ -77,7 +77,7 @@ module.exports.updateDepartment = asyncHandler(async(req,res)=>{
     if(managerId){
         validateId(managerId, 'User');
 
-        const manager = await User.findOne({_id: managerId});
+        const manager = await User.findById(managerId);
         if(!manager){
             throw ApiError.badRequest('User not found');
         }
