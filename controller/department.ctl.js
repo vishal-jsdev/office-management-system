@@ -7,6 +7,7 @@ const {
 const { asyncHandler} = require('../utils/asyncHandler');
 const { ApiResponse } = require('../utils/APIResponse');
 const { ApiError } = require('../utils/APIError');
+const User = require('../models/user.Schema');
 
 
 module.exports.addDepartment = asyncHandler(async (req, res)=> {
@@ -21,7 +22,16 @@ module.exports.addDepartment = asyncHandler(async (req, res)=> {
         )
     }
 
-    validateId(managerId, 'Department');
+    validateId(managerId, 'User');
+    const existDepartment = await Department.findOne({managerId});
+    if(existDepartment){
+        throw ApiError.badRequest('Duplicate department is existed with manager Id')
+    }
+
+    const manager = await User.findOne({_id: managerId});
+    if(!manager){
+        throw ApiError.badRequest('User not found');
+    }
 
     const department = new Department({
         name,
@@ -51,19 +61,36 @@ module.exports.getDepartment = asyncHandler(async(req,res)=>{
     const department = await Department.findById(req.params.id).populate('managerId').lean();
     const employees = await Employee.find({departmentId: department._id}).lean()
     department.employees = employees;
-    
-    return res.status(200).json(ApiResponse.success(department, 'Department fetched successfully'))
+     const { managerId, ...departmentData } = department;
+    const result = {
+        ...departmentData,
+        manager: managerId,
+        employees: employees,
+        totalEmployees: employees.length,
+    };
+    return res.status(200).json(ApiResponse.success(result, 'Department fetched successfully'))
 })
 
 module.exports.updateDepartment = asyncHandler(async(req,res)=>{
-    const { id , managerId , ...reqData } = req.body;
+    const { id , managerId , name, description } = req.body;
     validateId(id, 'Department');
     if(managerId){
-        validateId(managerId, 'Department');
+        validateId(managerId, 'User');
+
+        const manager = await User.findOne({_id: managerId});
+        if(!manager){
+            throw ApiError.badRequest('User not found');
+        }
+    }
+
+    const existDepartment = await Department.findOne({managerId});
+    if(existDepartment){
+        throw ApiError.badRequest('Duplicate department is existed with manager Id')
     }
 
     const saveData = {
-        ...reqData,
+        name,
+        description,
         managerId,
     }
 

@@ -13,7 +13,8 @@ const departmentSchema= new mongoose.Schema(
         managerId: {
             type: mongoose.Schema.Types.ObjectId,
             ref : 'User',
-            require: true
+            require: true,
+            unique: true
         }
     },
     {

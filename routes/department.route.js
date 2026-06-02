@@ -9,7 +9,7 @@ const { authMiddleware, isAdmin, isEmployee, isManager } = require('../middlewar
  * /department/add:
  *   post:
  *     summary: Create a new department
- *     tags: [Department  Management]
+ *     tags: [Department Management]
  *     description: name, description and managerId are required
  *     security:
  *       - bearerAuth: []   # JWT token required
@@ -47,22 +47,26 @@ route.post('/add', authMiddleware, isAdmin, ctl.addDepartment);
  * /department/:
  *   get:
  *     summary: Get departments 
- *     tags: [Department  Management]
+ *     tags: [Department Management]
  *     security:
  *       - bearerAuth: []   # JWT token required
  *     parameters:
  *       - in: query
- *         name: filters
- *         required: false
+ *         name: page
  *         schema:
- *           type: object
- *           properties:
- *             page:
- *               type: number
- *               example: 1
- *             limit:
- *               type: number
- *               example: 10
+ *           type: integer
+ *           minimum: 1
+ *           example: 1
+ *         description: Page number for pagination
+ *         required: false
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           example: 10
+ *         description: Number of departments per page
+ *         required: false
  *     responses:
  *       200:
  *         description: Returns department data
@@ -71,11 +75,22 @@ route.post('/add', authMiddleware, isAdmin, ctl.addDepartment);
  *             schema:
  *               type: object
  *               properties:
- *                 id:
- *                   type: string
- *                 name:
- *                   type: string
- *                 description:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                       managerId:
+ *                         type: object
+ *                       totalEmployees:
+ *                         type: integer
+ *                 message:
  *                   type: string
  *       401:
  *         description: Unauthorized, token missing or invalid
@@ -89,7 +104,7 @@ route.get('/', authMiddleware, ctl.getAllDepartments);
  * /department/{id}:
  *   get:
  *     summary: Get a department 
- *     tags: [Department  Management]
+ *     tags: [Department Management]
  *     security:
  *       - bearerAuth: []   # JWT token required
  *     parameters:
@@ -101,17 +116,28 @@ route.get('/', authMiddleware, ctl.getAllDepartments);
  *         description: department id to fetch details
  *     responses:
  *       200:
- *         description: Return department data
+ *         description: Returns department data
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 id:
- *                   type: string
- *                 name:
- *                   type: string
- *                 description:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                       managerId:
+ *                         type: object
+ *                       totalEmployees:
+ *                         type: integer
+ *                 message:
  *                   type: string
  *       401:
  *         description: Unauthorized, token missing or invalid
@@ -126,7 +152,7 @@ route.get('/:id', authMiddleware, ctl.getDepartment);
  * /department/update:
  *   patch:
  *     summary: Update a department details
- *     tags: [Department  Management]
+ *     tags: [Department Management]
  *     description: name, description and managerId are required
  *     security:
  *       - bearerAuth: []   # JWT token required
@@ -166,12 +192,13 @@ route.patch('/update', authMiddleware, isAdmin, ctl.updateDepartment);
  * /department/{id}:
  *   delete:
  *     summary: Remove a department 
- *     tags: [Department  Management]
+ *     tags: [Department Management]
  *     security:
  *       - bearerAuth: []   # JWT token required
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
  *           example: 6a197760b5a8ea451e22a5f8
@@ -184,7 +211,7 @@ route.patch('/update', authMiddleware, isAdmin, ctl.updateDepartment);
  *             schema:
  *               type: object
  *               properties:
- *                 id:
+ *                 _id:
  *                   type: string
  *                 name:
  *                   type: string
