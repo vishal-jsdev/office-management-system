@@ -28,7 +28,7 @@ module.exports.addDepartment = asyncHandler(async (req, res)=> {
         throw ApiError.badRequest('Duplicate department is existed with manager Id')
     }
 
-    const manager = await User.findOne({_id: managerId});
+    const manager = await User.findById(managerId);
     if(!manager){
         throw ApiError.badRequest('User not found');
     }
