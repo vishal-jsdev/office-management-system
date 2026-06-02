@@ -52,12 +52,8 @@ module.exports.getAllDepartments = asyncHandler(async(req,res)=>{
         const employees = await Employee.find({departmentId: department._id}).lean()
         department.totalEmployees = employees.length;
     }
-    const pagination = {
-        data: departments,
-        page,
-        limit
-    }
-    return res.status(200).json(ApiResponse.success(pagination, 'Departments fetched successfully'))
+    
+    return res.status(200).json(ApiResponse.success(departments, 'Departments fetched successfully', 200, {page, limit}))
 })
 
 module.exports.getDepartment = asyncHandler(async(req,res)=>{
