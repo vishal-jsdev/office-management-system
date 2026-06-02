@@ -25,7 +25,7 @@ module.exports.addDepartment = asyncHandler(async (req, res)=> {
     validateId(managerId, 'User');
     const existDepartment = await Department.findOne({managerId});
     if(existDepartment){
-        throw ApiError.badRequest('Duplicate department is existed with manager Id')
+        throw ApiError.badRequest('Same department already exists with the manager ID, and pass the ID.')
     }
 
     const manager = await User.findById(managerId);
@@ -52,7 +52,12 @@ module.exports.getAllDepartments = asyncHandler(async(req,res)=>{
         const employees = await Employee.find({departmentId: department._id}).lean()
         department.totalEmployees = employees.length;
     }
-    return res.status(200).json(ApiResponse.success(departments, 'Departments fetched successfully'))
+    const pagination = {
+        data: departments,
+        page,
+        limit
+    }
+    return res.status(200).json(ApiResponse.success(pagination, 'Departments fetched successfully'))
 })
 
 module.exports.getDepartment = asyncHandler(async(req,res)=>{
@@ -79,14 +84,16 @@ module.exports.updateDepartment = asyncHandler(async(req,res)=>{
 
         const manager = await User.findById(managerId);
         if(!manager){
-            throw ApiError.badRequest('User not found');
+            throw ApiError.badRequest('Manager Id invalid, No manager found');
+        }
+
+        const existDepartment = await Department.findOne({managerId}, { _id: { $ne: id } },);
+        if(existDepartment){
+            throw ApiError.badRequest('Duplicate department is existed with manager Id')
         }
     }
 
-    const existDepartment = await Department.findOne({managerId});
-    if(existDepartment){
-        throw ApiError.badRequest('Duplicate department is existed with manager Id')
-    }
+    
 
     const saveData = {
         name,
