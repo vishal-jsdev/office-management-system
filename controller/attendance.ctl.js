@@ -84,7 +84,7 @@ module.exports.getAllAttendances = asyncHandler(async(req, res)=>{
 
     const attendances = await Attendance.find(filters).populate('employeeId').skip(skip).limit(limit).lean()
     const totalattendances = await Attendance.find(filters).lean()
-    const totalPage = totalattendances.length;
+    const totalPage = Math.ceil(totalattendances.length / limit); 
     return res.status(200).json(ApiResponse.success(attendances, 'List of attandances fetched successfully', 200, {page,limit,totalPage}));
 })
 
