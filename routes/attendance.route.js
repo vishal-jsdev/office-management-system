@@ -38,7 +38,7 @@ const { authMiddleware, isAdmin, isManager, isEmployee } = require('../middlewar
  *         description: Invalid input
  */
 
-route.post('/check-in', authMiddleware, isEmployee, ctl.checkIn);
+route.post('/check-in/:employeeId', authMiddleware, isEmployee, ctl.checkIn);
 
 /**
  * @swagger
