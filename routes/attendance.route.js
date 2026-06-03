@@ -4,13 +4,21 @@ const ctl = require('../controller/attendance.ctl');
 const { authMiddleware, isAdmin, isManager, isEmployee } = require('../middleware/auth.middleware');
 /**
  * @swagger
- * /attendance/check-in:
+ * /attendance/check-in/{employeeId}:
  *   post:
  *     summary: Create a new attendance
  *     tags: [Attendance Management]
  *     description: employeeId is required
  *     security:
  *       - bearerAuth: []   # JWT token required
+ *     parameters:
+ *       - in: path
+ *         name: employeeId
+ *         schema:
+ *           type: string
+ *           example: 6a1960fea11f709cd1467167
+ *         required: true
+ *         description: employee ID of attendance
  *     requestBody:
  *       required: true
  *       content:
@@ -213,7 +221,7 @@ route.get('/', authMiddleware, isManager, ctl.getAllAttendances);
  *       400:
  *         description: Invalid input
  */
-route.get('/my-attendance', authMiddleware, isEmployee, ctl.getMyAttendance);
+route.get('/my-attendance', authMiddleware, ctl.getMyAttendance);
 
 /**
  * @swagger
