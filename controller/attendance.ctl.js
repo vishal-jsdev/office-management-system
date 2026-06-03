@@ -9,7 +9,7 @@ const { ApiResponse } = require('../utils/APIResponse');
 const { ApiError } = require('../utils/APIError')
 
 module.exports.checkIn = asyncHandler(async(req,res)=>{
-    const employeeId  = req.params.employeeId;
+    const employeeId  = req.user.userId;
     validateId(employeeId, 'Employee')
     const checkInTime = new Date()
     const parsedDate = new Date(checkInTime.getFullYear(),checkInTime.getMonth(),checkInTime.getDay(),0,0,0,0)
@@ -45,7 +45,9 @@ module.exports.checkOut = asyncHandler(async(req,res)=>{
     const checkOutTime = new Date();
     
     const attendance = await Attendance.findById(req.params.id);
-  
+    if(!attendance){
+        throw ApiError.notFound('Attendace not found')
+    }
     
     const hoursWorked = calculateWorkHours(attendance?.checkIn, checkOutTime ?? new Date());
     const attendanceData = await Attendance.findByIdAndUpdate(req.params.id, {
@@ -107,8 +109,10 @@ module.exports.getMyAttendance = asyncHandler(async(req, res)=>{
         filters.date = { $gt : startYear, $lt: endYear}
     }
     const attendances = await Attendance.find(filters).skip(skip).limit(limit).lean()
-
-    return res.status(200).json(ApiResponse.success(attendances, 'Attendance fetched successfully', 200, {page,limit}));
+    const totalAttendances = await Attendance.find(filters).lean()
+    const totalPage = Math.ceil(totalAttendances.length / limit); 
+    
+    return res.status(200).json(ApiResponse.success(attendances, 'Attendance fetched successfully', 200, {page,limit,totalPage}));
 
 })
 
@@ -117,15 +121,6 @@ module.exports.updateAttendance = asyncHandler(async(req,res)=>{
 
     const parsedCheckIn = new Date(checkIn)
     const parsedCheckOut = new Date(checkOut)
-
-    function calculateWorkHours(checkInTime, checkOutTime) {
-      const diffMs = checkOutTime.getTime() - checkInTime.getTime();
-    
-      const hours = Math.floor(diffMs / (1000 * 60 * 60));
-      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-
-      return `${hours}h ${minutes}m`;
-    }
 
     const hoursWorked = calculateWorkHours(parsedCheckIn, parsedCheckOut);
     
