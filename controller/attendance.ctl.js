@@ -56,9 +56,7 @@ module.exports.checkOut = asyncHandler(async(req,res)=>{
     const attendanceData = await Attendance.findByIdAndUpdate(req.params.id, {
         $set :{ checkOut: new Date(), hoursWorked ,status: "OUT"  }
     },{ new: true, runValidators: true})
-    if(!attendanceData){
-        throw ApiError.badRequest('Attendance not found')
-    }
+
 
     return res.status(200).json(ApiResponse.success(attendanceData,'Check-out registered successfully'))
 
@@ -122,10 +120,13 @@ module.exports.getMyAttendance = asyncHandler(async(req, res)=>{
 
 module.exports.updateAttendance = asyncHandler(async(req,res)=>{
     const { id, checkIn, checkOut, status } = req.body;
+    validateId(id, 'Attendance');
 
     const parsedCheckIn = new Date(checkIn)
     const parsedCheckOut = new Date(checkOut)
-
+    if(parsedCheckIn  > parsedCheckOut){
+        throw ApiError.badRequest('Check in should be less than check out time')
+    }
     const hoursWorked = calculateWorkHours(parsedCheckIn, parsedCheckOut);
     
     const saveData = {
@@ -138,6 +139,8 @@ module.exports.updateAttendance = asyncHandler(async(req,res)=>{
     const attendance = await Attendance.findByIdAndUpdate(id,{
         $set: saveData
     },{ new: true, runValidators: true})
-
+    if(!attendance){
+        throw ApiError.notFound('Attendance not found');
+    }
     return res.status(200).json(ApiResponse.success(attendance, "Attendance updated successfully"))
 })
