@@ -48,6 +48,9 @@ module.exports.checkOut = asyncHandler(async(req,res)=>{
     if(!attendance){
         throw ApiError.notFound('Attendace not found')
     }
+    if(attendance.employeeId !== req.user.userId){
+        throw ApiError.badRequest('User is invalid')
+    }
     
     const hoursWorked = calculateWorkHours(attendance?.checkIn, checkOutTime ?? new Date());
     const attendanceData = await Attendance.findByIdAndUpdate(req.params.id, {
@@ -78,8 +81,8 @@ module.exports.getAllAttendances = asyncHandler(async(req, res)=>{
         const endMonth = new Date(new Date().getFullYear(), month, 30)
         filters.date = { $gt : startMonth, $lt: endMonth}
     }
-    if(departmentId){
-        filters.employeeId.departmentId = departmentId;
+    if(departmentId && filters.employeeId){
+        filters.employeeId.departmentId  = departmentId;
     }
 
 
