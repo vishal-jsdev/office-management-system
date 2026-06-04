@@ -2,6 +2,7 @@ const express = require('express')
 const route = express.Router();
 const ctl = require('../controller/attendance.ctl');
 const { authMiddleware, isAdmin, isManager, isEmployee } = require('../middleware/auth.middleware');
+const {employeeAuthMiddleware }= require('../middleware/employeeAuth.middleware')
 /**
  * @swagger
  * /attendance/check-in:
@@ -30,7 +31,7 @@ const { authMiddleware, isAdmin, isManager, isEmployee } = require('../middlewar
  *         description: Invalid input
  */
 
-route.post('/check-in', authMiddleware, isEmployee, ctl.checkIn);
+route.post('/check-in', employeeAuthMiddleware, isEmployee, ctl.checkIn);
 
 /**
  * @swagger
@@ -56,7 +57,7 @@ route.post('/check-in', authMiddleware, isEmployee, ctl.checkIn);
  *         description: Invalid input
  */
 
-route.patch('/check-out/:id', authMiddleware, isEmployee, ctl.checkOut);
+route.patch('/check-out/:id', employeeAuthMiddleware, isEmployee, ctl.checkOut);
 
 
 /**
@@ -213,7 +214,7 @@ route.get('/', authMiddleware, isManager, ctl.getAllAttendances);
  *       400:
  *         description: Invalid input
  */
-route.get('/my-attendance', authMiddleware, ctl.getMyAttendance);
+route.get('/my-attendance', employeeAuthMiddleware, ctl.getMyAttendance);
 
 /**
  * @swagger

@@ -91,7 +91,8 @@ module.exports.getAllAttendances = asyncHandler(async(req, res)=>{
 })
 
 module.exports.getMyAttendance = asyncHandler(async(req, res)=>{
-    const { page=1, limit= 10,employeeId, month, year } = req.query;
+    const { page=1, limit= 10, month, year } = req.query;
+    const employeeId = req.user.userId;
     const skip = (page -1) * limit
     validateId(employeeId, 'Employee')
     const filters = {}

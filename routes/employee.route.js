@@ -8,7 +8,7 @@ const { authMiddleware, isAdmin, isManager, isEmployee } = require('../middlewar
  * /employee/add:
  *   post:
  *     summary: Create a new employee
- *     tags: [Employees  Management]
+ *     tags: [Employees Management]
  *     description: name, email, phone, role, department id, salary, joining date and status are required
  *     security:
  *       - bearerAuth: []   # JWT token required
@@ -66,7 +66,7 @@ route.post('/add', authMiddleware, isAdmin, ctl.addEmployee);
  * /employee/:
  *   get:
  *     summary: Get employees 
- *     tags: [Employees  Management]
+ *     tags: [Employees Management]
  *     security:
  *       - bearerAuth: []   # JWT token required
  *     parameters:
@@ -118,7 +118,7 @@ route.get('/',authMiddleware, isManager , ctl.getAllemployee);
  * /employee/{id}:
  *   get:
  *     summary: Get employees 
- *     tags: [Employees  Management]
+ *     tags: [Employees Management]
  *     security:
  *       - bearerAuth: []   # JWT token required
  *     parameters:
@@ -154,7 +154,7 @@ route.get('/:id',authMiddleware, isEmployee , ctl.getEmployee);
  * /employee/update:
  *   patch:
  *     summary: update an employee details
- *     tags: [Employees  Management]
+ *     tags: [Employees Management]
  *     description: id, name, phone, role, department id, salary and status are required
  *     security:
  *       - bearerAuth: []   # JWT token required
@@ -202,7 +202,7 @@ route.patch('/update',authMiddleware, isAdmin , ctl.updateEmployee);
  * /employee/{id}:
  *   patch:
  *     summary: remove an employee data 
- *     tags: [Employees  Management]
+ *     tags: [Employees Management]
  *     security:
  *       - bearerAuth: []   # JWT token required
  *     parameters:
@@ -232,5 +232,36 @@ route.patch('/update',authMiddleware, isAdmin , ctl.updateEmployee);
  *         description: User not found
  */
 route.patch('/:id',authMiddleware, isAdmin , ctl.removeEmployee);
+
+
+/**
+ * @swagger
+ * /employee/employee-login:
+ *   post:
+ *     summary: Login a employee
+ *     tags: [Employees Management]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: example@example.com
+ *               password:
+ *                 type: string
+ *                 example: password123
+ *     responses:
+ *       200:
+ *         description: Successfully logged in, returns JWT token
+ *       401:
+ *         description: Invalid credentials
+ */
+route.post('/employee-login', ctl.employeeLogin);
 
 module.exports = route;

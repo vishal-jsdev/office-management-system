@@ -39,6 +39,10 @@ const employeeSchema = new mongoose.Schema(
       enum:EMPLOYEE_STATUS,
       required: true,
       default: 'active'
+    },
+    password: {
+      type: String,
+      required:  true
     }
   },
   {
