@@ -88,12 +88,6 @@ route.patch('/check-out/:id', employeeAuthMiddleware, ctl.checkOut);
  *           type: number
  *           example: 5
  *         description: month of the attendances
- *       - in: query
- *         name: departmentId
- *         schema:
- *           type: string
- *           example: 6a1960fea11f709cd1467168
- *         description: department ID of the employees
  *     responses:
  *       200:
  *         description: Returns department data
