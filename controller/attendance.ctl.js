@@ -48,8 +48,8 @@ module.exports.checkOut = asyncHandler(async(req,res)=>{
     if(!attendance){
         throw ApiError.notFound('Attendace not found')
     }
-    if(attendance.employeeId !== req.user.userId){
-        throw ApiError.badRequest('User is invalid')
+    if(attendance.employeeId.toString() !== req.user.userId){
+        throw ApiError.Conflict('Invalid attendace for the employee');
     }
     
     const hoursWorked = calculateWorkHours(attendance?.checkIn, checkOutTime ?? new Date());
@@ -64,7 +64,7 @@ module.exports.checkOut = asyncHandler(async(req,res)=>{
 
 
 module.exports.getAllAttendances = asyncHandler(async(req, res)=>{
-    const { page= 1, limit= 10, employeeId, date, month, departmentId} = req.query;
+    const { page= 1, limit= 10, employeeId, date, month} = req.query;
 
     const skip = (page - 1) * limit;
     const filters = {}
@@ -78,9 +78,6 @@ module.exports.getAllAttendances = asyncHandler(async(req, res)=>{
         const startMonth = new Date(new Date().getFullYear(),month,1)
         const endMonth = new Date(new Date().getFullYear(), month, 30)
         filters.date = { $gt : startMonth, $lt: endMonth}
-    }
-    if(departmentId && filters.employeeId){
-        filters.employeeId.departmentId  = departmentId;
     }
 
 
@@ -113,8 +110,8 @@ module.exports.getMyAttendance = asyncHandler(async(req, res)=>{
     const attendances = await Attendance.find(filters).skip(skip).limit(limit).lean()
     const totalAttendances = await Attendance.find(filters).lean()
     const totalPage = Math.ceil(totalAttendances.length / limit); 
-    
-    return res.status(200).json(ApiResponse.success(attendances, 'Attendance fetched successfully', 200, {page,limit,totalPage}));
+    const totals = totalAttendances.length
+    return res.status(200).json(ApiResponse.success(attendances, 'Attendance fetched successfully', 200, {page,limit,totalPage, totals}));
 
 })
 

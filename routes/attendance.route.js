@@ -12,18 +12,6 @@ const {employeeAuthMiddleware }= require('../middleware/employeeAuth.middleware'
  *     description: employeeId is required
  *     security:
  *       - bearerAuth: []   # JWT token required
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - employeeId
- *             properties:
- *               employeeId:
- *                 type: string
- *                 example: 6a1960fea11f709cd1467167
  *     responses:
  *       201:
  *         description: Attendance successfully created
@@ -49,7 +37,7 @@ route.post('/check-in', employeeAuthMiddleware, ctl.checkIn);
  *           type: string
  *           example: 6a1ebaa326a58a4ebdf01c28
  *         required: true
- *         description: ID in Object ID format
+ *         description: Attendance ID to register check out
  *     responses:
  *       201:
  *         description: Attendance successfully updated
@@ -163,13 +151,6 @@ route.get('/', authMiddleware, isManager, ctl.getAllAttendances);
  *           type: number
  *           example: 10
  *         description: limit of the list
- *       - in: query
- *         name: employeeId
- *         schema:
- *           type: string
- *           example: 6a19720a235b3931304c5ebb
- *         required: true
- *         description: employee id of the attendances
  *       - in: query
  *         name: month
  *         schema:

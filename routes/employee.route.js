@@ -52,6 +52,9 @@ const { authMiddleware, isAdmin, isManager, isEmployee } = require('../middlewar
  *               status:
  *                 type: string
  *                 example: active
+ *               password:
+ *                 type: string
+ *                 example: password123
  *     responses:
  *       201:
  *         description: employee successfully created

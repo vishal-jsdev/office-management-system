@@ -1,4 +1,5 @@
 const Employee = require('../models/employee.Schema');
+const Department = require('../models/department.Schema')
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -42,6 +43,10 @@ module.exports.addEmployee = asyncHandler(async (req, res) => {
   }
 
   validateId(departmentId, 'Department')
+  const department = await Department.findById(departmentId);
+  if(!department){
+    throw ApiError.badRequest('Department not found')
+  }
   const parsedJoiningDate = validateDate(joiningDate)
 
 
