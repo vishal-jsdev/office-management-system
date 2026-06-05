@@ -1,4 +1,5 @@
 const Employee = require('../models/employee.Schema');
+const Department = require('../models/department.Schema')
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -23,10 +24,10 @@ function sanitizeUser(user) {
   };
 }
 module.exports.addEmployee = asyncHandler(async (req, res) => {
-  const { name, email , phone, role, departmentId, salary, joiningDate, status } = req.body;
-  if (!name || !email || !phone || !role || !departmentId || !salary || !joiningDate || !status) {
+  const { name, email , phone, role, departmentId, salary, joiningDate, status, password } = req.body;
+  if (!name || !email || !phone || !role || !departmentId || !salary || !joiningDate || !status || !password) {
     throw ApiError.badRequest(
-      'Name, Email, Phone, Role, Department Id, Salary, Joining Date and Status are required',
+      'Name, Email, Phone, Role, Department Id, Salary, Joining Date, Password and Status are required',
       {
         name: !name ? 'Name is required' : undefined,
         email: !email ? 'Email is required' : undefined,
@@ -35,12 +36,17 @@ module.exports.addEmployee = asyncHandler(async (req, res) => {
         departmentId: !departmentId? 'Department Id is required': undefined,
         salary: !salary? 'Salary is required': undefined,
         joiningDate: !joiningDate? 'Joining Date is required': undefined,
-        status: !status? 'Status is required': undefined
+        status: !status? 'Status is required': undefined,
+        password: !password? 'Password is required': undefined
       }
     );
   }
 
   validateId(departmentId, 'Department')
+  const department = await Department.findById(departmentId);
+  if(!department){
+    throw ApiError.badRequest('Department not found')
+  }
   const parsedJoiningDate = validateDate(joiningDate)
 
 
@@ -57,7 +63,7 @@ module.exports.addEmployee = asyncHandler(async (req, res) => {
      throw ApiError.badRequest('Employee already exists')
    }
 
-
+  const hashedPassword = await bcrypt.hash(password, 10);
   const employee = new Employee({
     name: name.trim(),
     email: email.trim().toLowerCase(),
@@ -66,7 +72,8 @@ module.exports.addEmployee = asyncHandler(async (req, res) => {
     departmentId,
     salary,
     joiningDate: parsedJoiningDate,
-    status: status ?? "active"
+    status: status ?? "active",
+    password: hashedPassword
   });
   await employee.save();
 
@@ -174,3 +181,45 @@ module.exports.removeEmployee = asyncHandler(async(req,res)=>{
 
   return res.status(200).json(ApiResponse.success(employeeData, 'Employee deleted successfully'))
 })
+
+function sanitizeEmployee(employee) {
+  return {
+    id: employee?._id,
+    email: employee?.email,
+    name: employee?.name
+  };
+}
+
+module.exports.employeeLogin = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    throw ApiError.badRequest('Email and password are required', {
+      email: !email ? 'email is required' : undefined,
+      password: !password ? 'password is required' : undefined,
+    });
+  }
+
+  const employee = await Employee.findOne({ email: email.trim().toLowerCase() });
+  if (!employee) {
+    throw ApiError.notFound('User not found');
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, employee.password);
+  if (!isPasswordValid) {
+    throw ApiError.unauthorized('Invalid password');
+  }
+
+  const token = jwt.sign({ userId: employee._id , email: employee.email, role: employee.role }, JWT_SECRET, {
+    expiresIn: JWT_EXPIRY,
+  });
+
+  return res
+    .status(200)
+    .json(
+      ApiResponse.success(
+        { ...sanitizeUser(employee), token },
+        'Login successfully!'
+      )
+    );
+});

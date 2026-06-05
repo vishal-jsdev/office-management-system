@@ -8,7 +8,7 @@ const { authMiddleware, isAdmin, isManager, isEmployee } = require('../middlewar
  * /employee/add:
  *   post:
  *     summary: Create a new employee
- *     tags: [Employees  Management]
+ *     tags: [Employees Management]
  *     description: name, email, phone, role, department id, salary, joining date and status are required
  *     security:
  *       - bearerAuth: []   # JWT token required
@@ -52,6 +52,9 @@ const { authMiddleware, isAdmin, isManager, isEmployee } = require('../middlewar
  *               status:
  *                 type: string
  *                 example: active
+ *               password:
+ *                 type: string
+ *                 example: password123
  *     responses:
  *       201:
  *         description: employee successfully created
@@ -66,31 +69,40 @@ route.post('/add', authMiddleware, isAdmin, ctl.addEmployee);
  * /employee/:
  *   get:
  *     summary: Get employees 
- *     tags: [Employees  Management]
+ *     tags: [Employees Management]
  *     security:
  *       - bearerAuth: []   # JWT token required
  *     parameters:
  *       - in: query
- *         name: filters
- *         required: false
+ *         name: page
  *         schema:
- *           type: object
- *           properties:
- *             page:
- *               type: number
- *               example: 1
- *             limit:
- *               type: number
- *               example: 10
- *             departmentId:
- *               type: string
- *               example: 6a1960fea11f709cd1467167
- *             role:
- *               type: string
- *               example: employee
- *             status:
- *               type: string
- *               example: active
+ *           type: number
+ *           example: 1
+ *         description: page number for the list
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: number
+ *           example: 10
+ *         description: limit of the list
+ *       - in: query
+ *         name: departmentId
+ *         schema:
+ *           type: string
+ *           example: 6a1960fea11f709cd1467167
+ *         description: department id of employee
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *           example: employee
+ *         description: The role of employee
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           example: active
+ *         description: The status of employee  
  *     responses:
  *       200:
  *         description: Returns user data
@@ -118,7 +130,7 @@ route.get('/',authMiddleware, isManager , ctl.getAllemployee);
  * /employee/{id}:
  *   get:
  *     summary: Get employees 
- *     tags: [Employees  Management]
+ *     tags: [Employees Management]
  *     security:
  *       - bearerAuth: []   # JWT token required
  *     parameters:
@@ -154,7 +166,7 @@ route.get('/:id',authMiddleware, isEmployee , ctl.getEmployee);
  * /employee/update:
  *   patch:
  *     summary: update an employee details
- *     tags: [Employees  Management]
+ *     tags: [Employees Management]
  *     description: id, name, phone, role, department id, salary and status are required
  *     security:
  *       - bearerAuth: []   # JWT token required
@@ -202,7 +214,7 @@ route.patch('/update',authMiddleware, isAdmin , ctl.updateEmployee);
  * /employee/{id}:
  *   patch:
  *     summary: remove an employee data 
- *     tags: [Employees  Management]
+ *     tags: [Employees Management]
  *     security:
  *       - bearerAuth: []   # JWT token required
  *     parameters:
@@ -232,5 +244,36 @@ route.patch('/update',authMiddleware, isAdmin , ctl.updateEmployee);
  *         description: User not found
  */
 route.patch('/:id',authMiddleware, isAdmin , ctl.removeEmployee);
+
+
+/**
+ * @swagger
+ * /employee/employee-login:
+ *   post:
+ *     summary: Login a employee
+ *     tags: [Employees Management]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: example@example.com
+ *               password:
+ *                 type: string
+ *                 example: password123
+ *     responses:
+ *       200:
+ *         description: Successfully logged in, returns JWT token
+ *       401:
+ *         description: Invalid credentials
+ */
+route.post('/employee-login', ctl.employeeLogin);
 
 module.exports = route;

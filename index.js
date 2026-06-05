@@ -12,6 +12,7 @@ const basicAuth = require('express-basic-auth');
 const Auth = require('./routes/auth.route');
 const Employee = require('./routes/employee.route');
 const Department = require('./routes/department.route');
+const Attendance = require('./routes/attendance.route');
 connectDB();
 app.use(
   cors({
@@ -40,6 +41,7 @@ const swaggerAuth =
 app.use('/auth', Auth);
 app.use('/employee', Employee);
 app.use('/department', Department);
+app.use('/attendance', Attendance);
 // swagger route
 app.use(
   '/api-docs',
