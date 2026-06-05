@@ -13,7 +13,7 @@ const employeeAuthMiddleware = async (req, _, next) => {
 
     const employee = await employeeSchema.findById(decoded?.userId);
     if (!employee) {
-      return next(ApiError.unauthorized('Invalid token'));
+      return next(ApiError.unauthorized('Only employee has authorization to this endpoint'));
     }
 
     req.user = decoded;
