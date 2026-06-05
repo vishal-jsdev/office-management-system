@@ -44,12 +44,12 @@ module.exports.checkOut = asyncHandler(async(req,res)=>{
     validateId(req.params.id, 'Attedance');
     const checkOutTime = new Date();
     
-    const attendance = await Attendance.findById(req.params.id);
+    const attendance = await Attendance.findOne({_id:req.params.id, employeeId:req.user.userId});
     if(!attendance){
         throw ApiError.notFound('Attendace not found')
     }
     if(attendance.employeeId.toString() !== req.user.userId){
-        throw ApiError.Conflict('Invalid attendace for the employee');
+        throw ApiError.conflict('Invalid attendace for the employee');
     }
     
     const hoursWorked = calculateWorkHours(attendance?.checkIn, checkOutTime ?? new Date());
@@ -85,7 +85,7 @@ module.exports.getAllAttendances = asyncHandler(async(req, res)=>{
     const attendances = await Attendance.find(filters).populate('employeeId').skip(skip).limit(limit).lean()
     const totalattendances = await Attendance.find(filters).lean()
     const totalPage = Math.ceil(totalattendances.length / limit); 
-    return res.status(200).json(ApiResponse.success(attendances, 'List of attandances fetched successfully', 200, {page,limit,totalPage}));
+    return res.status(200).json(ApiResponse.success(attendances, 'List of attandances fetched successfully', 200, {totalAttendances: totalattendances.length, page,limit,totalPage}));
 })
 
 module.exports.getMyAttendance = asyncHandler(async(req, res)=>{
