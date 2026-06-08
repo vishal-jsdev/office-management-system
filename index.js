@@ -13,6 +13,7 @@ const Auth = require('./routes/auth.route');
 const Employee = require('./routes/employee.route');
 const Department = require('./routes/department.route');
 const Attendance = require('./routes/attendance.route');
+const Leave = require('./routes/leave.route');
 connectDB();
 app.use(
   cors({
@@ -42,6 +43,7 @@ app.use('/auth', Auth);
 app.use('/employee', Employee);
 app.use('/department', Department);
 app.use('/attendance', Attendance);
+app.use('/leave', Leave)
 // swagger route
 app.use(
   '/api-docs',

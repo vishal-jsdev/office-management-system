@@ -60,6 +60,9 @@ module.exports.getDepartment = asyncHandler(async(req,res)=>{
     validateId(req.params.id, 'department');
     
     const department = await Department.findById(req.params.id).populate('managerId').lean();
+    if(!department){
+        throw ApiError.notFound('Department not found');
+    }
     const employees = await Employee.find({departmentId: department._id}).lean()
     department.employees = employees;
      const { managerId, ...departmentData } = department;
