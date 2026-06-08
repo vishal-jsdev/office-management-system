@@ -16,7 +16,7 @@ const employeeAuthMiddleware = async (req, _, next) => {
       return next(ApiError.unauthorized('Only employee has authorization to this endpoint'));
     }
 
-    req.user = decoded;
+    req.user = {...decoded, departmentId : employee.departmentId};
     next();
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
