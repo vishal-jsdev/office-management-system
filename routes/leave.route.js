@@ -205,6 +205,13 @@ route.get('/my-leave', employeeAuthMiddleware, ctl.getMyLeaves);
  *     description: Get a single leave
  *     security:
  *       - bearerAuth: []   # JWT token required
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Leave ID
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: Returns department data
@@ -348,7 +355,7 @@ route.patch('/reject', authMiddleware, isManager, ctl.rejectLeave);
 
 /**
  * @swagger
- * /leave/cancel:
+ * /leave/cancel/{id}:
  *   delete:
  *     summary: Cancel a leave
  *     tags: [Leave Management]

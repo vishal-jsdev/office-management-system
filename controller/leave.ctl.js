@@ -23,11 +23,32 @@ module.exports.applyLeave = asyncHandler(async(req,res)=> {
         throw ApiError.badRequest(`Type is invalid. Allow values are ${LEAVE_TYPE.join(',')}`)
     }
 
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(fromDate) || !dateRegex.test(toDate)) {
+        throw ApiError.badRequest("Date must be in YYYY-MM-DD format");
+    }
+
     const parsedFromDate = new Date(fromDate)
     const parsedToDate = new Date(toDate);
 
     if(parsedFromDate>parsedToDate){
         throw ApiError.badRequest('FromDate cann\'t be greater than To Date')
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (parsedFromDate < today) {
+        throw ApiError.badRequest("Leave cannot be applied for past dates");
+    }
+    const existingLeave = await Leave.findOne({
+        employeeId,
+        fromDate: { $lte: parsedToDate },
+        toDate: { $gte: parsedFromDate },
+    });
+    if (existingLeave) {
+        throw ApiError.badRequest(
+        "Leave already exists for the selected date range",
+        );
     }
 
     const leave = new Leave({
@@ -63,19 +84,25 @@ module.exports.getAllLeaves = asyncHandler(async(req,res)=> {
     }
 
     if(employeeId){
+        validateId(employeeId,'Employee')
         filters.employeeId = employeeId;
     }
 
-    if(month){
-        const startMonth = new Date(new Date().getFullYear(), month, 1)
-        const endMonth = new Date(new Date().getFullYear(), month, 30)
-        filters.date ={ $gt : startMonth, $lt: endMonth}
+    if (month) {
+        const year = new Date().getFullYear();
+        const monthIndex = Number(month) - 1;
+        const startMonth = new Date(year, monthIndex, 1);
+        const endMonth = new Date(year, month, 0);
+        filters.fromDate = { $gt: startMonth, $lte: endMonth };
+        filters.toDate = { $gt: startMonth, $lte: endMonth };
     }
 
-    const leaves = await Leave.find(filters).skip(skip).limit(limit).lean();
-    const totalLeaves = await Leave.find(filters).lean()
-    const totalPage = Math.ceil(totalLeaves.length/limit)
-    return res.status(200).json(ApiResponse.success(leaves,'List of leaves fetched successfully',200, {page,limit,totalPage, totals:totalLeaves.length}))
+    const [leaves, totalLeaves] = await Promise.all([
+    Leave.find(filters).skip(skip).limit(limit).lean(),
+    Leave.countDocuments(filters),
+  ]);
+    const totalPage = Math.ceil(totalLeaves/limit)
+    return res.status(200).json(ApiResponse.success(leaves,'List of leaves fetched successfully',200, {page,limit,totalPage, totals:totalLeaves}))
 
 })
 
@@ -85,11 +112,12 @@ module.exports.getMyLeaves = asyncHandler(async(req,res)=>{
     const employeeId = req.user.userId
     const filter = {employeeId}
 
-    const leaves = await Leave.find(filter).skip(skip).limit(limit).lean()
-    
-    const totalLeaves = await Leave.find(filter).lean()
-    const totalPage = Math.ceil(totalLeaves.length/limit)
-    return res.status(200).json(ApiResponse.success(leaves,'List of my leaves fetched successfully',200, {page,limit,totalPage, totals:totalLeaves.length}))
+    const [leaves, totalLeaves] = await Promise.all([
+    Leave.find(filter).skip(skip).limit(limit).lean(),
+    Leave.countDocuments(filter),
+    ]);
+    const totalPage = Math.ceil(totalLeaves/limit)
+    return res.status(200).json(ApiResponse.success(leaves,'List of my leaves fetched successfully',200, {page,limit,totalPage, totals:totalLeaves}))
 })
 
 module.exports.getSingleLeave = asyncHandler(async(req,res)=>{
@@ -127,7 +155,8 @@ module.exports.rejectLeave = asyncHandler(async(req,res)=>{
     }
     const saveData = {
         reason,
-        status: 'rejected'
+        status: 'rejected',
+        reviewNote: 'Leave Rejected'
     }
     const leave = await Leave.findByIdAndUpdate(id,{
         $set: saveData
@@ -147,7 +176,7 @@ module.exports.cancelLeave = asyncHandler(async(req,res)=>{
         throw ApiError.notFound('Leave not found');
     }
     if(['approved','rejected'].includes(leave.status)){
-        throw ApiError.badRequest(`Leave is already ${leave.status}`)
+        throw ApiError.badRequest(`Leave is already ${leave.status}. Only pending leaves can be cancelled`)
     }
     if(leave.employeeId.toString()!==req.user.userId){
         throw ApiError.badRequest('Leave is not owned by the user')

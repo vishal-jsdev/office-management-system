@@ -5,7 +5,7 @@ const leaveScehma = new mongoose.Schema({
     employeeId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Employee',
-        require: true
+        required: true
     },
     type: {
         type: String,
@@ -14,19 +14,20 @@ const leaveScehma = new mongoose.Schema({
     },
     fromDate: {
         type: Date,
-        require:true
+        required:true
     },
     toDate: {
         type: Date,
-        require:true
+        required:true
     },
     reason: {
-        type: String
+        type: String,
+        required:true
     },
     status: {
         type: String,
         enum: LEAVE_STATUS,
-        require: true,
+        required: true,
         default: 'pending'
     },
     reviewNote: {
