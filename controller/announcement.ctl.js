@@ -24,7 +24,7 @@ module.exports.addAnnouncement = asyncHandler(async(req,res)=>{
     }
     if(targetDepartment){
         validateId(targetDepartment, 'Department');
-        const department = await Department.findById(targetDepartment);
+        const department = await Department.findById(targetDepartment).lean();
         if(!department){
             throw ApiError.notFound('Department not found')
         }
@@ -82,32 +82,20 @@ module.exports.updateAnnouncement = asyncHandler(async(req,res)=>{
     const saveData = {}
     if(targetDepartment){
         validateId(targetDepartment, 'Announcement');
-        const department = await Department.findById(targetDepartment);
+        const department = await Department.findById(targetDepartment).lean();
         if(!department){
             throw ApiError.notFound('Department not found')
         }
         saveData.targetDepartment = targetDepartment;
     }
     
-    if(title){
+    if(title && title.trim()){
         saveData.title = title
     }
-    if(body) {
+    if(body && body.trim()) {
         saveData.body = body
     }
 
-    function isEmpty(obj) {
-        for (const prop in obj) {
-            if (Object.hasOwn(obj, prop)) {
-            return false;
-            }
-        }
-
-        return true;
-    }
-    if(isEmpty(saveData)){
-        throw ApiError.badRequest('Atleast one field should be updated')
-    }
 
     const announcement = await Announcement.findByIdAndUpdate(id, {
         $set : saveData

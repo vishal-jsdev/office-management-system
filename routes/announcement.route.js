@@ -152,7 +152,7 @@ route.get('/', employeeOrAdminAuthMiddleware, ctl.getAllAnnouncement);
  *       400:
  *         description: Invalid input
  */
-route.get('/:id', authMiddleware, isEmployee, ctl.getAnnouncement)
+route.get('/:id', authMiddleware, ctl.getAnnouncement)
 
 /**
  * @swagger
