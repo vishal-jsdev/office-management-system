@@ -15,7 +15,7 @@ const employeeOrAdminAuthMiddleware = async (req, _, next) => {
     const user = await userSchema.findById(decoded?.userId);
     if (user){
       if(user.role !== 'admin'){
-        next(ApiError.unauthorized('Only admins and employees have authorization to this endpoint'))
+        throw ApiError.unauthorized('Only admins and employees have authorization to this endpoint');
 
       }
     } else {
