@@ -2,7 +2,7 @@ const express = require('express')
 const route = express.Router();
 const ctl = require('../controller/announcement.ctl');
 const { authMiddleware, isAdmin, isEmployee, isManager} = require('../middleware/auth.middleware')
-const {employeeAuthMiddleware} = require('../middleware/employeeAuth.middleware')
+const {employeeOrAdminAuthMiddleware} = require('../middleware/employeeOrAdminAuth.middleware')
 
 /**
  * @swagger
@@ -105,7 +105,7 @@ route.post('/add', authMiddleware, isAdmin, ctl.addAnnouncement);
  *       400:
  *         description: Invalid input
  */
-route.get('/', employeeAuthMiddleware, isEmployee, ctl.getAllAnnouncement);
+route.get('/', employeeOrAdminAuthMiddleware, ctl.getAllAnnouncement);
 
 /**
  * @swagger
