@@ -1,4 +1,5 @@
 const Announcement = require('../models/announcement.Schema');
+const Department = require('../models/department.Schema');
 
 const {asyncHandler } = require('../utils/asyncHandler');
 const {ApiError }= require('../utils/APIError');
@@ -23,6 +24,10 @@ module.exports.addAnnouncement = asyncHandler(async(req,res)=>{
     }
     if(targetDepartment){
         validateId(targetDepartment, 'Department');
+        const department = await Department.findById(targetDepartment);
+        if(!department){
+            throw ApiError.notFound('Department not found')
+        }
         saveData.targetDepartment = targetDepartment;
     }
 
@@ -71,12 +76,20 @@ module.exports.getAnnouncement = asyncHandler(async(req,res)=>{
 })
 
 module.exports.updateAnnouncement = asyncHandler(async(req,res)=>{
-    const { id , ...reqData} = req.body;
+    const { id , title, body, targetDepartment} = req.body;
     validateId(id, 'Announcement');
-
+    if(targetDepartment){
+        validateId(targetDepartment, 'Announcement');
+        const department = await Department.findById(targetDepartment);
+        if(!department){
+            throw ApiError.notFound('Department not found')
+        }
+    }
+    
     const saveData = {
-        ...reqData,
-
+        title,
+        body,
+        targetDepartment
     }
 
     const announcement = await Announcement.findByIdAndUpdate(id, {
