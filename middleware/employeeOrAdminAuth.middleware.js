@@ -1,22 +1,33 @@
 const employeeSchema = require('../models/employee.Schema');
+const userSchema = require('../models/user.Schema');
+
 const jwt = require('jsonwebtoken');
 const { ApiError } = require('../utils/APIError');
 
-const employeeAuthMiddleware = async (req, _, next) => {
+const employeeOrAdminAuthMiddleware = async (req, _, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
       return next(ApiError.unauthorized('No token, authorization denied'));
     }
-    
+    const userData = {};
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    const user = await userSchema.findById(decoded?.userId);
+    if (user){
+      if(user.role !== 'admin'){
+        throw ApiError.unauthorized('Only admins and employees have authorization to this endpoint');
 
-    const employee = await employeeSchema.findById(decoded?.userId);
-    if (!employee) {
-      return next(ApiError.unauthorized('Only employee has authorization to this endpoint'));
+      }
+    } else {
+      const employee = await employeeSchema.findById(decoded?.userId);
+      if (!employee) {
+        return next(ApiError.unauthorized('Only employee has authorization to this endpoint'));
+      }
+      userData.departmentId = employee.departmentId;
     }
+   
 
-    req.user = {...decoded, departmentId : employee.departmentId};
+    req.user = {...decoded, ...userData};
     next();
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
@@ -39,4 +50,4 @@ const employeeAuthMiddleware = async (req, _, next) => {
 };
 
 
-module.exports = { employeeAuthMiddleware };
+module.exports = { employeeOrAdminAuthMiddleware };
